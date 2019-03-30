@@ -106,6 +106,7 @@ write_page_to_disk(uint dev, char *pg, uint blk)
       pg++;
     }
     bwrite(buffer);
+    brelse(buffer);
   }
 
 }
@@ -122,6 +123,7 @@ read_page_from_disk(uint dev, char *pg, uint blk)
       *pg = buffer->data[j];
        pg++;
     }
+    brelse(buffer);
   }
 }
 
