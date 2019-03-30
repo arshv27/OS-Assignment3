@@ -94,14 +94,15 @@ balloc_page(uint dev)
 
   while(c < 8){
     temp[c] = balloc(dev);
+    if(temp[c] + BSIZE >= sb.size){
+      return -1;
+    }
     if(c > 0){
-      if(temp[c] - temp[c - 1] == BPB){
+      if(temp[c] - temp[c - 1] == BSIZE){
         c++;
       }else{
-        if(temp[c] + BPB >= sb.size){
-          return -1;
-        }
-        for(int j = 0; j < 8; j++){
+        for(int j = 0; j <= c; j++){
+          bfree(dev, temp[j]);
           temp[j] = 0;
           c = 0;
         }
@@ -117,7 +118,7 @@ void
 bfree_page(int dev, uint b)
 {
   for(int t = 0; t < 8; t++){
-    bfree(dev, b + t * BPB);
+    bfree(dev, b + t * BSIZE);
   }
 }
 
