@@ -27,6 +27,10 @@ swap_page_from_pte(pte_t *pte)
 		aa++;
 	}
 	write_page_to_disk(1, dd, baddr);
+	PTE_P = PTE_P & !PTE_P;
+	PTE_SWP = PTE_SWP | 0Xfff;
+	*pte = (baddr << 12) | (*pte & 0xfff);
+	kfree(P2V(phys_addr));
 }
 
 /* Select a victim and swap the contents to the disk.
