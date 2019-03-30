@@ -85,7 +85,30 @@ balloc(uint dev)
 uint
 balloc_page(uint dev)
 {
-	return -1;
+  int b, bi, m;
+  struct buf *bp;
+  uint temp[] = {0, 0, 0, 0, 0, 0, 0, 0};
+  int flag = 0;
+  bp = 0;
+  int c = 0;
+
+  while(c < 8){
+    temp[c] = balloc(dev);
+    if(c > 0){
+      if(temp[c] - temp[c - 1] == BPB){
+        c++;
+      }else{
+        if(temp[c] + BPB >= sb.size){
+          return -1;
+        }
+        for(int j = 0; j < 8; j++){
+          temp[j] = 0;
+          c = 0;
+        }
+      }
+    }
+  }
+  return temp[0];
 }
 
 /* Free disk blocks allocated using balloc_page.
@@ -93,6 +116,9 @@ balloc_page(uint dev)
 void
 bfree_page(int dev, uint b)
 {
+  for(int t = 0; t < 8; t++){
+    bfree(dev, b + t * BPB);
+  }
 }
 
 // Free a disk block.
