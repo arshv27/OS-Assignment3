@@ -18,6 +18,15 @@
 void
 swap_page_from_pte(pte_t *pte)
 {
+	int baddr = balloc_page(1);
+	char dd[4096];
+	uint phys_addr = PTE_ADDR(*pte);
+	char *aa = (char*) P2V(phys_addr);
+	for(int i = 0; i < 4096; i++){
+		dd[i] = *aa;
+		aa++;
+	}
+	write_page_to_disk(1, dd, baddr);
 }
 
 /* Select a victim and swap the contents to the disk.

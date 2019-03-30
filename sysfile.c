@@ -465,7 +465,6 @@ sys_swap(void)
     return -1;
   // swap addr
 
-  
-  
+
   return 0;
 }
