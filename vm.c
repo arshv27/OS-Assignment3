@@ -349,6 +349,9 @@ clearaccessbit(pde_t *pgdir)
 int
 getswappedblk(pde_t *pgdir, uint va)
 {
+  pte_t *pte = walkpgdir(pgdir, (void*) va, 1);
+
+  if (PTE_SWP) return (*pte>>12);
   return -1;
 }
 
