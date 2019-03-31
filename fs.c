@@ -134,16 +134,6 @@ balloc_page(uint dev)
 }
 
 
-/* Free disk blocks allocated using balloc_page.
- */
-void
-bfree_page(int dev, uint b)
-{
-  for(int t = 0; t < 8; t++){
-    bfree(dev, b + t);
-  }
-}
-
 // Free a disk block.
 static void
 bfree(int dev, uint b)
@@ -161,6 +151,17 @@ bfree(int dev, uint b)
   log_write(bp);
   brelse(bp);
 }
+
+/* Free disk blocks allocated using balloc_page.
+ */
+void
+bfree_page(int dev, uint b)
+{
+  for(int t = 0; t < 8; t++){
+    bfree(dev, b + t);
+  }
+}
+
 
 // Inodes.
 //
