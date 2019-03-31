@@ -52,7 +52,17 @@ swap_page(pde_t *pgdir)
 void
 map_address(pde_t *pgdir, uint addr)
 {
-	panic("map_address is not implemented");
+	char* paddr = kalloc();
+	if(*paddr == 0x0){
+		uint blockaddr = balloc_page(1);
+	}else{
+		pte_t *pte; 
+		pte = walkpgdir(pgdir, (void*)addr, 1);
+		if(*pte & PTE_SWP){
+			read_page_from_disk(dev, *paddr, *pte);
+		}
+		*pte = V2P(*paddr) | PTE_P;
+	}
 }
 
 /* page fault handler */

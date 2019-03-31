@@ -319,21 +319,18 @@ select_a_victim(pde_t *pgdir)
       }
     }
   }
-  int cc = 0;
+
   for(int va = 0; va < KERNBASE; va += 4096){
-    if(cc > (KERNBASE / 4096) / 10){
-      break;
-    }
+    
     pte_t *pt_entry;
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
       if(*pt_entry & PTE_P){
-        (*pt_entry & PTE_P) = 0x1;
-        cc++;
+        (*pt_entry & PTE_P) = 0x0;
+        select_a_victim(pgdir);      
       }
     }
   }
-  select_a_victim(pgdir);
 
 	return 0;
 }
@@ -349,7 +346,7 @@ clearaccessbit(pde_t *pgdir)
 int
 getswappedblk(pde_t *pgdir, uint va)
 {
-  pte_t *pte = walkpgdir(pgdir, (void*) va, 1);
+  pte_t *pte = walkpgdir(pgdir, (void*) va, 0);
 
   if (PTE_SWP) return (*pte>>12);
   return -1;
