@@ -326,7 +326,7 @@ select_a_victim(pde_t *pgdir)
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
       if(*pt_entry & PTE_P){
-        (*pt_entry & PTE_P) = 0x0;
+        *pt_entry = *pt_entry & !PTE_A;
         select_a_victim(pgdir);      
       }
     }
