@@ -146,7 +146,7 @@ write_page_to_disk(uint dev, char *pg, uint blk)
     bwrite(buffer);
     brelse(buffer);
   }
-  cprintf("%s\n", "exit write");
+  //cprintf("%s\n", "exit write");
 }
 
 /* Read 4096 bytes from the eight consecutive

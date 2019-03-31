@@ -52,7 +52,7 @@ swap_page_from_pte(pte_t *pte)
 	uint baddr = balloc_page(1);
 	char *aa = (char*) P2V(PTE_ADDR(*pte));
 	write_page_to_disk(1, aa, baddr);
-	cprintf("lol\n");
+	//cprintf("lol\n");
 	*pte = (baddr << 12) | PTE_SWP | (*pte & 0xffe);
 	lcr3(V2P(myproc()->pgdir));
 	kfree(aa);
@@ -65,9 +65,9 @@ int
 swap_page(pde_t *pgdir)
 {
 	// begin_op();
-	cprintf("%s\n", "swapped page start");
+	cprintf("%s\n", "swapping page!");
 	pte_t *p = select_a_victim(pgdir);
-	cprintf("%s\n", "swapped page");
+	//cprintf("%s\n", "swapped page");
 	swap_page_from_pte(p);
 	// end_op();
 	return 1;
