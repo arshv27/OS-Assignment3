@@ -94,8 +94,8 @@ found:
 
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
-    p->state = UNUSED;
-    return 0;
+    swap_page(myproc()->pgdir);
+    p->kstack = kalloc();
   }
   sp = p->kstack + KSTACKSIZE;
 
