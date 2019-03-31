@@ -320,6 +320,15 @@ select_a_victim(pde_t *pgdir)
     }
   }
 
+  clearaccessbit(pgdir);
+
+	return 0;
+}
+
+// Clear access bit of a random pte.
+void
+clearaccessbit(pde_t *pgdir)
+{
   for(int va = 0; va < KERNBASE; va += 4096){
     
     pte_t *pt_entry;
@@ -331,14 +340,6 @@ select_a_victim(pde_t *pgdir)
       }
     }
   }
-
-	return 0;
-}
-
-// Clear access bit of a random pte.
-void
-clearaccessbit(pde_t *pgdir)
-{
 }
 
 // return the disk block-id, if the virtual address
