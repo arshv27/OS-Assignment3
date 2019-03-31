@@ -380,23 +380,48 @@ copyuvm(pde_t *pgdir, uint sz)
   pte_t *pte;
   uint pa, i, flags;
   char *mem;
+  int flag = 0;
 
   if((d = setupkvm()) == 0)
     return 0;
 
   for(i = 0; i < sz; i += PGSIZE){
+    cprintf("I: %d\n", i);
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
-    if(!(*pte & PTE_P))
-      panic("copyuvm: page not present");
-    pa = PTE_ADDR(*pte);
-    flags = PTE_FLAGS(*pte);
-    if((mem = kalloc()) == 0)
-      goto bad;
+    if(!(*pte & PTE_P)) {
+      if (*pte & PTE_SWP) {
+        flag = 1;
+      } else{
+        panic("copyuvm: page not present");
+      }
+      
+    }
 
-    memmove(mem, (char*)P2V(pa), PGSIZE);
-    if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
-      goto bad;
+    if((mem = kalloc()) == 0) { 
+      // goto bad;
+      swap_page(pgdir);
+      mem = kalloc();
+    }
+
+    if (flag) {
+
+      pa = PTE_ADDR(*pte);
+      pa = pa >> 12;
+      flags = PTE_FLAGS(*pte);
+      read_page_from_disk(1, mem, pa);
+      if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
+        goto bad;
+
+    } else {
+      pa = PTE_ADDR(*pte);
+      flags = PTE_FLAGS(*pte);
+
+      memmove(mem, (char*)P2V(pa), PGSIZE);
+      if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
+        goto bad;
+    }
+    
   }
   return d;
 

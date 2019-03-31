@@ -65,7 +65,7 @@ int
 swap_page(pde_t *pgdir)
 {
 	// begin_op();
-	cprintf("%s\n", "swapping page!");
+	// cprintf("%s\n", "swapping page!");
 	pte_t *p = select_a_victim(pgdir);
 	//cprintf("%s\n", "swapped page");
 	swap_page_from_pte(p);

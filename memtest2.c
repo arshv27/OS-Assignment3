@@ -36,9 +36,11 @@ mem(void)
 			goto failed;
 		*(char**)m1 = m2;
 		((int*)m1)[2] = count++;
+		// printf(1,"M1: %d, count: %d\n", m1, count);
 		m1 = m2;
 		cur += 4096;
 	}
+	// printf(1,"out of while loop");
 	((int*)m1)[2] = count;
 	total_count = count;
 
@@ -46,27 +48,31 @@ mem(void)
 	m1 = start;
 
 	while (count != total_count) {
+		// printf(1,"count: %d\n", count);
 		if (((int*)m1)[2] != count)
 			goto failed;
 		m1 = *(char**)m1;
 		count++;
 	}
-
+	// printf(1,"out of 2nd while loop");
 	if (swap(start) != 0)
 		printf(1, "failed to swap %p\n", start);
-
+	printf(1,"Forking\n");
 	pid = fork();
-
+	printf(1,"PID: %d\n", pid);
+	printf(1,"Done Forking\n");
 	if (pid == 0){
 		count = 0;
 		m1 = start;
 	
 		while (count != total_count) {
+			printf(1,"M1: %d, count: %d\n", m1, count);
 			if (((int*)m1)[2] != count)
 				goto failed;
 			m1 = *(char**)m1;
 			count++;
 		}
+		printf(1,"Out of while loop\n");
 		exit();
 	}
 	else if (pid < 0)
@@ -75,6 +81,7 @@ mem(void)
 	}
 	else if (pid > 0)
 	{
+		printf(1, "Parents PID = %d\n", pid);
 		wait();
 	}
 
