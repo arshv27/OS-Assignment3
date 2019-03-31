@@ -23,8 +23,13 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
   if(*pde & PTE_P){
     pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
   } else {
-    if(!alloc || (pgtab = (pte_t*)kalloc()) == 0)
+    if(!alloc)
       return 0;
+  	if ((pgtab = (pte_t*)kalloc()) == 0)
+  	{
+  		swap_page(pgdir);
+  		pgtab = (pte_t*)kalloc();
+  	}
     // Make sure all those PTE_P bits are zero.
     memset(pgtab, 0, PGSIZE);
     // The permissions here are overly generous, but they can
@@ -43,22 +48,15 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
 void
 swap_page_from_pte(pte_t *pte)
 {
-	int baddr = balloc_page(1);
-	char dd[4096];
-	uint phys_addr = PTE_ADDR(*pte);
-	char *aa = (char*) P2V(phys_addr);
-	for(int i = 0; i < 4096; i++){
-		dd[i] = *aa;
-		aa++;
-	}
-	write_page_to_disk(1, dd, baddr);
-	*pte = *pte & ~PTE_P;
-	// (*pte & PTE_P) = (*pte & PTE_P) & !(*pte & PTE_P);
-	*pte = *pte | PTE_SWP;
-	// (*pte & PTE_SWP) = (*pte & PTE_SWP) | 0Xfff;
-	*pte = (baddr << 12) | (*pte & 0xfff);
+	begin_op();
+	uint baddr = balloc_page(1);
+	char *aa = (char*) P2V(PTE_ADDR(*pte));
+	write_page_to_disk(1, aa, baddr);
+	cprintf("lol\n");
+	*pte = (baddr << 12) | PTE_SWP | (*pte & 0xffe);
 	lcr3(V2P(myproc()->pgdir));
-	kfree(P2V(phys_addr));
+	kfree(aa);
+	end_op();
 }
 
 /* Select a victim and swap the contents to the disk.
@@ -66,10 +64,12 @@ swap_page_from_pte(pte_t *pte)
 int
 swap_page(pde_t *pgdir)
 {
-	begin_op();
+	// begin_op();
+	cprintf("%s\n", "swapped page start");
 	pte_t *p = select_a_victim(pgdir);
+	cprintf("%s\n", "swapped page");
 	swap_page_from_pte(p);
-	end_op();
+	// end_op();
 	return 1;
 }
 
@@ -81,19 +81,24 @@ swap_page(pde_t *pgdir)
 void
 map_address(pde_t *pgdir, uint addr)
 {
+	begin_op();
 	char* paddr = kalloc();
 	if(paddr == 0){
 		swap_page(pgdir);
 		paddr = kalloc();
 	}
-	pte_t *p = walkpgdir(pgdir, (void*)addr, 1);
-	int blk = getswappedblk(pgdir, addr);
-	*p = V2P(paddr) | PTE_P | PTE_U |  PTE_W;
-	*p = *p & ~PTE_SWP;
+	pte_t *p = walkpgdir(pgdir, (char*)addr, 1);
+	uint blk = getswappedblk(pgdir, addr);
 	if (blk != -1) {
-		read_page_from_disk(1, (char *) p, blk);
+		*p = V2P(paddr) | (*p & 0xfff);
+		*p &= (~PTE_SWP);
+		*p |= PTE_P;
+		read_page_from_disk(1, (char *) paddr, blk);
 		bfree_page(1, blk);
 	}
+	else
+		*p = V2P(paddr) | PTE_P | PTE_U | PTE_W;
+	end_op();
 }
 
 /* page fault handler */

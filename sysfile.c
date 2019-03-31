@@ -467,6 +467,5 @@ sys_swap(void)
   struct proc* curr = myproc();
   swap_page(curr->pgdir);
 
-
   return 0;
 }

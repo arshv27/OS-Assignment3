@@ -307,34 +307,41 @@ freevm(pde_t *pgdir)
 pte_t*
 select_a_victim(pde_t *pgdir)
 {
-
-  for(int va = 0; va < KERNBASE; va += 4096){
+  // cprintf("%s\n","select_a_victim");
+  int va;
+  for(va = KERNBASE - 1; va >= 0; va-=4096){
     pte_t *pt_entry;
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
+    	// cprintf("%s\n","after pt_entry != 0");
       if(*pt_entry & PTE_P){
+      	// cprintf("%s\n","yay");
         if((*pt_entry & PTE_A) == 0){
-          return (pte_t*) pt_entry;
+          // *pt_entry = *pt_entry & ~PTE_P;
+          // cprintf("%s\n","exit select_a_victim");
+          return pt_entry;
         }
       }
     }
   }
 
   clearaccessbit(pgdir);
+  //cprintf("%s\n","exit select_a_victim");
   return select_a_victim(pgdir);
-	
 }
 
 // Clear access bit of a random pte.
 void
 clearaccessbit(pde_t *pgdir)
 {
-  for(int va = 0; va < KERNBASE; va += 4096){
+  int va;
+  for(va = KERNBASE - 1; va >= 0; va-=4096){
     pte_t *pt_entry;
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
       if(*pt_entry & PTE_P){
-        *pt_entry = *pt_entry & !PTE_A;    
+        *pt_entry = *pt_entry & ~PTE_A;
+        return;
       }
     }
   }
@@ -345,7 +352,7 @@ clearaccessbit(pde_t *pgdir)
 int
 getswappedblk(pde_t *pgdir, uint va)
 {
-  pte_t *pte = walkpgdir(pgdir, (void*) va, 0);
+  pte_t *pte = walkpgdir(pgdir, (char*) va, 0);
 
   if (*pte & PTE_SWP) return (*pte>>12);
   return -1;

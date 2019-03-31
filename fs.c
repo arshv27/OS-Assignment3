@@ -111,21 +111,23 @@ balloc_page(uint dev)
   // }
   // return temp[0];
   // }
-  begin_op();
-  int b, bi, m;
+
+  int b, bi, m, j;
   struct buf *bp;
 
   bp = 0;
   for(b = 0; b < sb.size; b += BPB){
     bp = bread(dev, BBLOCK(b, sb));
-    for(bi = 0; bi < BPB && b + bi < sb.size; bi+=8){
+    for(bi = 0; bi < BPB && b + bi + 8 < sb.size; bi+=8){
       m = 0xff;
       if((bp->data[bi/8] & m) == 0){  // Is block free?
         bp->data[bi/8] |= m;  // Mark block in use.
         log_write(bp);
         brelse(bp);
-        bzero(dev, b + bi);
-        end_op();
+        for(j = 0; j < 8; j++){
+        	bzero(dev, b + bi + j);
+    	}
+
         return b + bi;
       }
     }
@@ -148,8 +150,10 @@ bfree(int dev, uint b)
   bp = bread(dev, BBLOCK(b, sb));
   bi = b % BPB;
   m = 1 << (bi % 8);
+
   if((bp->data[bi/8] & m) == 0)
     panic("freeing free block");
+
   bp->data[bi/8] &= ~m;
   log_write(bp);
   brelse(bp);
@@ -160,20 +164,9 @@ bfree(int dev, uint b)
 void
 bfree_page(int dev, uint b)
 {
-  begin_op();
-  struct buf *bp;
-  int bi, m;
-
-  readsb(dev, &sb);
-  bp = bread(dev, BBLOCK(b, sb));
-  bi = b % BPB;
-  m = 0xff;
-  if((bp->data[bi/8] & m) == 0)
-    panic("freeing free block");
-  bp->data[bi/8] &= ~m;
-  log_write(bp);
-  brelse(bp);
-  end_op();
+  int x;
+  for(x = 0; x < 8; x++)
+  	bfree(1, b + x);
 }
 
 
