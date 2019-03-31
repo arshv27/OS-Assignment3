@@ -123,14 +123,21 @@ setupkvm(void)
   pde_t *pgdir;
   struct kmap *k;
 
-  if((pgdir = (pde_t*)kalloc()) == 0)
-    return 0;
+  if((pgdir = (pde_t*)kalloc()) == 0) {
+    swap_page(myproc()->pgdir);
+    pgdir = (pde_t*)kalloc();
+    // if((pgdir = (pde_t*)kalloc()) == 0) {
+    //   cprintf("wrteojhg;woerbh");
+    //   return 0;
+    // }
+  }
   memset(pgdir, 0, PGSIZE);
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
     panic("PHYSTOP too high");
   for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
     if(mappages(pgdir, k->virt, k->phys_end - k->phys_start,
                 (uint)k->phys_start, k->perm) < 0) {
+      // cprintf("BAD MOFO\n");
       freevm(pgdir);
       return 0;
     }
@@ -386,11 +393,12 @@ copyuvm(pde_t *pgdir, uint sz)
     return 0;
 
   for(i = 0; i < sz; i += PGSIZE){
-    cprintf("I: %d\n", i);
+    // cprintf("I: %d\n", i);
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P)) {
       if (*pte & PTE_SWP) {
+        cprintf("Flag is 1\n");
         flag = 1;
       } else{
         panic("copyuvm: page not present");
@@ -402,12 +410,14 @@ copyuvm(pde_t *pgdir, uint sz)
       // goto bad;
       swap_page(pgdir);
       mem = kalloc();
+      // if (mem == 0) {
+      //   cprintf("hahahahahahahaha\n");
+      // }
     }
 
     if (flag) {
 
-      pa = PTE_ADDR(*pte);
-      pa = pa >> 12;
+      pa = *pte>>12;
       flags = PTE_FLAGS(*pte);
       read_page_from_disk(1, mem, pa);
       if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
