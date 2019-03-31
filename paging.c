@@ -55,7 +55,7 @@ void
 map_address(pde_t *pgdir, uint addr)
 {
 	char* paddr = kalloc();
-	if(*paddr == 0x0){
+	if(paddr == 0){
 		uint blockaddr = balloc_page(1);
 	}else{
 		pte_t *pte; 
