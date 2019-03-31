@@ -94,8 +94,10 @@ found:
 
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
-    p->state = UNUSED;
-    return 0;
+    // p->state = UNUSED;
+    // return 0;
+    swap_page(myproc()->pgdir);
+    p->kstack = kalloc();
   }
   sp = p->kstack + KSTACKSIZE;
 
@@ -176,6 +178,7 @@ fork(void)
   int i, pid;
   struct proc *np;
   struct proc *curproc = myproc();
+  curr = myproc();
 
   // Allocate process.
   if((np = allocproc()) == 0){

@@ -11,6 +11,7 @@
 
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
+// struct proc* curr;
 
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
@@ -44,8 +45,15 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
   if(*pde & PTE_P){
     pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
   } else {
-    if(!alloc || (pgtab = (pte_t*)kalloc()) == 0)
+    if(!alloc)
       return 0;
+  	if ((pgtab = (pte_t*)kalloc()) == 0) {
+  		swap_page(curr->pgdir);
+  		pgtab = (pte_t*)kalloc();
+  		if ((pgtab = (pte_t*)kalloc()) == 0) {
+  			cprintf("jogprejg");
+  		}
+  	}
     // Make sure all those PTE_P bits are zero.
     memset(pgtab, 0, PGSIZE);
     // The permissions here are overly generous, but they can
@@ -124,12 +132,12 @@ setupkvm(void)
   struct kmap *k;
 
   if((pgdir = (pde_t*)kalloc()) == 0) {
-    swap_page(myproc()->pgdir);
+    swap_page(curr->pgdir);
     pgdir = (pde_t*)kalloc();
-    // if((pgdir = (pde_t*)kalloc()) == 0) {
-    //   cprintf("wrteojhg;woerbh");
-    //   return 0;
-    // }
+    if((pgdir = (pde_t*)kalloc()) == 0) {
+      cprintf("wrteojhg;woerbh");
+      return 0;
+    }
   }
   memset(pgdir, 0, PGSIZE);
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
@@ -393,7 +401,7 @@ copyuvm(pde_t *pgdir, uint sz)
     return 0;
 
   for(i = 0; i < sz; i += PGSIZE){
-    // cprintf("I: %d\n", i);
+    cprintf("I: %d\n", i);
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P)) {

@@ -463,7 +463,7 @@ sys_swap(void)
   uint addr;
   if(argint(0, (int*)&addr) < 0)
     return -1;
-  // swap addr
+  swap_page(curr->pgdir);
 
   return 0;
 }
