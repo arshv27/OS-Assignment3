@@ -307,6 +307,34 @@ freevm(pde_t *pgdir)
 pte_t*
 select_a_victim(pde_t *pgdir)
 {
+
+  for(int va = 0; va < KERNBASE; va += 4096){
+    pte_t *pt_entry;
+    pt_entry = walkpgdir(pgdir, (void*)va, 0);
+    if(pt_entry != 0){
+      if(*pt_entry & PTE_P){
+        if(*pt_entry & PTE_A == 0){
+          return (pte_t*) pt_entry;
+        }
+      }
+    }
+  }
+  int cc = 0;
+  for(int va = 0; va < KERNBASE; va += 4096){
+    if(cc > (KERNBASE / 4096) / 10){
+      break;
+    }
+    pte_t *pt_entry;
+    pt_entry = walkpgdir(pgdir, (void*)va, 0);
+    if(pt_entry != 0){
+      if(*pt_entry & PTE_P){
+        (*pt_entry & PTE_P) = 0x1;
+        cc++;
+      }
+    }
+  }
+  select_a_victim(pgdir);
+
 	return 0;
 }
 

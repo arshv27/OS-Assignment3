@@ -147,7 +147,7 @@ struct segdesc {
 #define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF)
 #define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF)
 
-#ifndef __ASSEMBLER__
+#ifndef __ASSEMBLER__ 
 typedef uint pte_t;
 
 // Task state segment format
