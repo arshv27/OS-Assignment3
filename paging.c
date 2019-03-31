@@ -27,7 +27,7 @@ swap_page_from_pte(pte_t *pte)
 		aa++;
 	}
 	write_page_to_disk(1, dd, baddr);
-	*pte = *pte & !PTE_P ;
+	*pte = *pte & ~PTE_P;
 	// (*pte & PTE_P) = (*pte & PTE_P) & !(*pte & PTE_P);
 	*pte = *pte | PTE_SWP;
 	// (*pte & PTE_SWP) = (*pte & PTE_SWP) | 0Xfff;
@@ -56,14 +56,16 @@ map_address(pde_t *pgdir, uint addr)
 {
 	char* paddr = kalloc();
 	if(paddr == 0){
-		uint blockaddr = balloc_page(1);
-	}else{
-		pte_t *pte; 
-		pte = walkpgdir(pgdir, (void*)addr, 1);
-		if(*pte & PTE_SWP){
-			read_page_from_disk(dev, *paddr, *pte);
-		}
-		*pte = V2P(*paddr) | PTE_P;
+		swap_page(pgdir);
+		paddr = kalloc();
+	}
+	pte_t *p = walkpgdir(pgdir, (void*)addr, 1);
+	int blk = getswappedblk(pgdir, addr);
+	*p = V2P(paddr) | PTE_P | PTE_U |  PTE_W;
+	*p = *p & ~PTE_SWP;
+	if (blk != -1) {
+		read_page_from_disk(1, (char *) p, blk);
+		bfree_page(1, blk);
 	}
 }
 
