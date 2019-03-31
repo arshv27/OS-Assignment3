@@ -111,25 +111,29 @@ balloc_page(uint dev)
   // }
   // return temp[0];
   // }
-  begin_op();
+  cprintf("hello\n");
+ // begin_op();
   int b, bi, m;
   struct buf *bp;
 
   bp = 0;
+  cprintf("in balloc_page\n");
   for(b = 0; b < sb.size; b += BPB){
+    cprintf("checking bitmap block number %d\n", b);
     bp = bread(dev, BBLOCK(b, sb));
     for(bi = 0; bi < BPB && b + bi < sb.size; bi+=8){
+      cprintf("checking block number %d\n", b + bi);
       m = 0xff;
       if((bp->data[bi/8] & m) == 0){  // Is block free?
         bp->data[bi/8] |= m;  // Mark block in use.
         log_write(bp);
         brelse(bp);
         bzero(dev, b + bi);
-        end_op();
+        //end_op();
+        cprintf("block allocated %d\n", b + bi);
         return b + bi;
       }
     }
-
     brelse(bp);
   }
   panic("balloc: out of blocks");

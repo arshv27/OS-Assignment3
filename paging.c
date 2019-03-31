@@ -43,20 +43,22 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
 void
 swap_page_from_pte(pte_t *pte)
 {
+	cprintf("swap_page_from_pte\n");
 	int baddr = balloc_page(1);
-	char dd[4096];
-	uint phys_addr = PTE_ADDR(*pte);
+	cprintf("baddr = %d\n", baddr);
+	uint phys_addr = PTE_ADDR(pte);
+	cprintf("fuck this man\n");
 	char *aa = (char*) P2V(phys_addr);
-	for(int i = 0; i < 4096; i++){
-		dd[i] = *aa;
-		aa++;
-	}
-	write_page_to_disk(1, dd, baddr);
+	cprintf("write_page_to_disk\n");
+	write_page_to_disk(1, aa, baddr);
+	cprintf("write_page_to_disk finished\n");
 	*pte = *pte & ~PTE_P;
+	cprintf("hereeeee\n");
 	// (*pte & PTE_P) = (*pte & PTE_P) & !(*pte & PTE_P);
 	*pte = *pte | PTE_SWP;
 	// (*pte & PTE_SWP) = (*pte & PTE_SWP) | 0Xfff;
 	*pte = (baddr << 12) | (*pte & 0xfff);
+	cprintf("%x\n", *pte);
 	lcr3(V2P(myproc()->pgdir));
 	kfree(P2V(phys_addr));
 }
@@ -67,6 +69,7 @@ int
 swap_page(pde_t *pgdir)
 {
 	begin_op();
+	cprintf("swap_page\n");
 	pte_t *p = select_a_victim(pgdir);
 	swap_page_from_pte(p);
 	end_op();

@@ -314,8 +314,9 @@ select_a_victim(pde_t *pgdir)
     if(pt_entry != 0){
       if(*pt_entry & PTE_P){
         if((*pt_entry & PTE_A) == 0){
-          cprintf("%d\n", (pte_t*) *pt_entry);
-          return (pte_t*) *pt_entry;
+          *pt_entry = *pt_entry | PTE_A;
+          cprintf("%x\n", (pte_t*) pt_entry);
+          return (pte_t*) pt_entry;
         }
       }
     }
@@ -335,7 +336,7 @@ clearaccessbit(pde_t *pgdir)
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
       if(*pt_entry & PTE_P){
-        *pt_entry = *pt_entry & !PTE_A;    
+        *pt_entry = *pt_entry & ~PTE_A;    
       }
     }
   }
