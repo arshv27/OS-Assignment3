@@ -32,6 +32,7 @@ swap_page_from_pte(pte_t *pte)
 	*pte = *pte | PTE_SWP;
 	// (*pte & PTE_SWP) = (*pte & PTE_SWP) | 0Xfff;
 	*pte = (baddr << 12) | (*pte & 0xfff);
+	lcr3(V2P(myproc()->pgdir));
 	kfree(P2V(phys_addr));
 }
 

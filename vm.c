@@ -330,7 +330,6 @@ void
 clearaccessbit(pde_t *pgdir)
 {
   for(int va = 0; va < KERNBASE; va += 4096){
-    
     pte_t *pt_entry;
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
