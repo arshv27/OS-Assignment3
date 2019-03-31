@@ -41,9 +41,8 @@ swap_page_from_pte(pte_t *pte)
 int
 swap_page(pde_t *pgdir)
 {
-	char *p = (char*)select_a_victim(pgdir);
-	uint bb = balloc_page(1);
-	write_page_to_disk(1, p, bb);
+	pte_t *p = select_a_victim(pgdir);
+	swap_page_from_pte(p);
 	return 1;
 }
 
