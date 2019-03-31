@@ -81,7 +81,6 @@ swap_page(pde_t *pgdir)
 void
 map_address(pde_t *pgdir, uint addr)
 {
-	begin_op();
 	char* paddr = kalloc();
 	if(paddr == 0){
 		swap_page(pgdir);
@@ -93,9 +92,8 @@ map_address(pde_t *pgdir, uint addr)
 	*p = *p & ~PTE_SWP;
 	if (blk != -1) {
 		read_page_from_disk(1, (char *) p, blk);
-		//bfree_page(1, blk);
+		bfree_page(1, blk);
 	}
-	end_op();
 }
 
 /* page fault handler */

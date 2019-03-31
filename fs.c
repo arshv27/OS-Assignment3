@@ -111,26 +111,29 @@ balloc_page(uint dev)
   // }
   // return temp[0];
   // }
-
+  begin_op();
   int b, bi, m;
   struct buf *bp;
 
   bp = 0;
   for(b = 0; b < sb.size; b += BPB){
     bp = bread(dev, BBLOCK(b, sb));
-    for(bi = 0; bi < BPB && b + bi < sb.size; bi++){
+    for(bi = 0; bi < BPB && b + bi < sb.size; bi+=8){
       m = 0xff;
       if((bp->data[bi/8] & m) == 0){  // Is block free?
         bp->data[bi/8] |= m;  // Mark block in use.
         log_write(bp);
         brelse(bp);
         bzero(dev, b + bi);
+        end_op();
         return b + bi;
       }
     }
+
     brelse(bp);
   }
   panic("balloc: out of blocks");
+
 }
 
 
@@ -157,9 +160,20 @@ bfree(int dev, uint b)
 void
 bfree_page(int dev, uint b)
 {
-  for(int t = 0; t < 8; t++){
-    bfree(dev, b + t);
-  }
+  begin_op();
+  struct buf *bp;
+  int bi, m;
+
+  readsb(dev, &sb);
+  bp = bread(dev, BBLOCK(b, sb));
+  bi = b % BPB;
+  m = 0xff;
+  if((bp->data[bi/8] & m) == 0)
+    panic("freeing free block");
+  bp->data[bi/8] &= ~m;
+  log_write(bp);
+  brelse(bp);
+  end_op();
 }
 
 
