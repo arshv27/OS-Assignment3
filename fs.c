@@ -110,6 +110,7 @@ balloc_page(uint dev)
   //   }
   // }
   // return temp[0];
+  // }
 
   int b, bi, m;
   struct buf *bp;
@@ -131,7 +132,7 @@ balloc_page(uint dev)
   }
   panic("balloc: out of blocks");
 }
-}
+
 
 /* Free disk blocks allocated using balloc_page.
  */
