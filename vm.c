@@ -321,8 +321,8 @@ select_a_victim(pde_t *pgdir)
   }
 
   clearaccessbit(pgdir);
-
-	return 0;
+  return select_a_victim(pgdir);
+	
 }
 
 // Clear access bit of a random pte.
@@ -335,8 +335,7 @@ clearaccessbit(pde_t *pgdir)
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
       if(*pt_entry & PTE_P){
-        *pt_entry = *pt_entry & !PTE_A;
-        select_a_victim(pgdir);      
+        *pt_entry = *pt_entry & !PTE_A;    
       }
     }
   }
