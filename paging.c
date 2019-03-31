@@ -27,8 +27,10 @@ swap_page_from_pte(pte_t *pte)
 		aa++;
 	}
 	write_page_to_disk(1, dd, baddr);
-	(*pte & PTE_P) = (*pte & PTE_P) & !(*pte & PTE_P);
-	(*pte & PTE_SWP) = (*pte & PTE_SWP) | 0Xfff;
+	*pte = *pte & !PTE_P ;
+	// (*pte & PTE_P) = (*pte & PTE_P) & !(*pte & PTE_P);
+	*pte = *pte | PTE_SWP;
+	// (*pte & PTE_SWP) = (*pte & PTE_SWP) | 0Xfff;
 	*pte = (baddr << 12) | (*pte & 0xfff);
 	kfree(P2V(phys_addr));
 }
