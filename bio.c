@@ -100,7 +100,7 @@ write_page_to_disk(uint dev, char *pg, uint blk)
 {
 
   for(int t = 0; t < 8; t++){
-    struct buf *buffer = bread(dev, blk + t * 512);
+    struct buf *buffer = bread(dev, blk + t);
     for(int j = 0; j < 512; j++){
       buffer->data[j] = *pg;
       pg++;
@@ -118,7 +118,7 @@ void
 read_page_from_disk(uint dev, char *pg, uint blk)
 {
   for(int t = 0; t < 8; t++){
-    struct buf *buffer = bread(dev, blk + t * 512);
+    struct buf *buffer = bread(dev, blk + t);
     for(int j = 0; j < 512; j++){
       *pg = buffer->data[j];
        pg++;
