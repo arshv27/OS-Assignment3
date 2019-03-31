@@ -464,8 +464,6 @@ sys_swap(void)
   if(argint(0, (int*)&addr) < 0)
     return -1;
   // swap addr
-  struct proc* curr = myproc();
-  swap_page(curr->pgdir);
 
   return 0;
 }

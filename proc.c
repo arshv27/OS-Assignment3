@@ -188,6 +188,7 @@ fork(void)
     kfree(np->kstack);
     np->kstack = 0;
     np->state = UNUSED;
+    cprintf("BAD MOFO\n");
     return -1;
   }
   cprintf("Exiting copyuvm\n");
@@ -196,7 +197,7 @@ fork(void)
   *np->tf = *curproc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
-  np->tf->eax = np->pid;
+  np->tf->eax = 0;
 
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
@@ -206,14 +207,14 @@ fork(void)
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
-  cprintf("In Fork PID: %d\n", pid);
+  //cprintf("In Fork PID: %d\n", pid);
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
 
   release(&ptable.lock);
 
-  return 0;
+  return pid;
 }
 
 // Exit the current process.  Does not return.
