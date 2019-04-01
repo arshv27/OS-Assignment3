@@ -86,33 +86,6 @@ balloc(uint dev)
 uint
 balloc_page(uint dev)
 {
-  // int b, bi, m;
-  // struct buf *bp;
-  // uint temp[] = {0, 0, 0, 0, 0, 0, 0, 0};
-  // int flag = 0;
-  // bp = 0;
-  // int c = 0;
-
-  // while(c < 8){
-  //   temp[c] = balloc(dev);
-  //   if(temp[c] + BSIZE >= sb.size){
-  //     return -1;
-  //   }
-  //   if(c > 0){
-  //     if(temp[c] - temp[c - 1] == 1){
-  //       c++;
-  //     }else{
-  //       for(int j = 0; j <= c; j++){
-  //         bfree(dev, temp[j]);
-  //         temp[j] = 0;
-  //         c = 0;
-  //       }
-  //     }
-  //   }
-  // }
-  // return temp[0];
-  // }
-
   int b, bi, m, j;
   struct buf *bp;
 
