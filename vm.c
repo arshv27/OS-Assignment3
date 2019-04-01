@@ -12,6 +12,8 @@
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 
+int parentpresent = 0;
+pde_t *parentpgdir;
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
 void
@@ -47,7 +49,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     if(!alloc)
       return 0;
     if ((pgtab = (pte_t*)kalloc()) == 0){
-      swap_page(pgdir);
+      swap_page(parentpgdir);
       pgtab = (pte_t*)kalloc();
     }
     // Make sure all those PTE_P bits are zero.
@@ -128,7 +130,13 @@ setupkvm(void)
   struct kmap *k;
 
   if((pgdir = (pde_t*)kalloc()) == 0) {
-    swap_page(myproc()->pgdir);
+    if (parentpresent == 1)
+    {
+      swap_page(parentpgdir);
+      pgdir = (pde_t *)kalloc();
+    }
+    else
+      return 0;
     pgdir = (pde_t*)kalloc();
     // if((pgdir = (pde_t*)kalloc()) == 0) {
     //   cprintf("wrteojhg;woerbh");
@@ -247,9 +255,10 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   for(; a < newsz; a += PGSIZE){
     mem = kalloc();
     if(mem == 0){
-      //cprintf("allocuvm out of memory\n");
+      swap_page(pgdir);
+      mem = kalloc();
       deallocuvm(pgdir, newsz, oldsz);
-      return 0;
+      //return 0;
     }
     memset(mem, 0, PGSIZE);
     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
@@ -387,6 +396,8 @@ clearpteu(pde_t *pgdir, char *uva)
 pde_t*
 copyuvm(pde_t *pgdir, uint sz)
 {
+  parentpgdir = pgdir;
+  parentpresent = 1;
   pde_t *d;
   pte_t *pte;
   uint pa, i, flags;
@@ -397,19 +408,6 @@ copyuvm(pde_t *pgdir, uint sz)
     return 0;
 
   for(i = 0; i < sz; i += PGSIZE){
-    // cprintf("I: %d\n", i);
-    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
-      panic("copyuvm: pte should exist");
-    if(!(*pte & PTE_P)) {
-      if (*pte & PTE_SWP) {
-        cprintf("Flag is 1\n");
-        flag = 1;
-      } else{
-        panic("copyuvm: page not present");
-      }
-      
-    }
-
     if((mem = kalloc()) == 0) { 
       // goto bad;
       swap_page(pgdir);
@@ -418,12 +416,23 @@ copyuvm(pde_t *pgdir, uint sz)
       //   cprintf("hahahahahahahaha\n");
       // }
     }
-
+    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+      panic("copyuvm: pte should exist");
+    if(!(*pte & PTE_P)) {
+      if (*pte & PTE_SWP) {
+        flag = 1;
+      } else{
+        panic("copyuvm: page not present");
+      }
+      
+    }
     if (flag) {
-
+      begin_op();
       pa = *pte>>12;
       flags = PTE_FLAGS(*pte);
       read_page_from_disk(1, mem, pa);
+      bfree_page(1,pa);
+      end_op();
       if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
         goto bad;
 

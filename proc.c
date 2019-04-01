@@ -237,6 +237,8 @@ exit(void)
       curproc->ofile[fd] = 0;
     }
   }
+  // cprintf("EXITT\n");
+  // freevm(curproc->pgdir);
 
   begin_op();
   iput(curproc->cwd);
