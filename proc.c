@@ -188,10 +188,8 @@ fork(void)
     kfree(np->kstack);
     np->kstack = 0;
     np->state = UNUSED;
-    // cprintf("BAD MOFO\n");
     return -1;
   }
-  // cprintf("Exiting copyuvm\n");
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
@@ -207,7 +205,6 @@ fork(void)
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
-  //cprintf("In Fork PID: %d\n", pid);
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
@@ -237,8 +234,6 @@ exit(void)
       curproc->ofile[fd] = 0;
     }
   }
-  // cprintf("EXITT\n");
-  // freevm(curproc->pgdir);
 
   begin_op();
   iput(curproc->cwd);

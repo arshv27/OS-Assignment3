@@ -127,7 +127,6 @@ begin_op(void)
 {
   acquire(&log.lock);
   while(1){
-    // cprintf("FUCK FUCK\n");
     if(log.committing){
       sleep(&log, &log.lock);
     } else if(log.lh.n + (log.outstanding+1)*MAXOPBLOCKS > LOGSIZE){
