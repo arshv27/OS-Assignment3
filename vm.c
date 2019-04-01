@@ -138,10 +138,6 @@ setupkvm(void)
     else
       return 0;
     pgdir = (pde_t*)kalloc();
-    // if((pgdir = (pde_t*)kalloc()) == 0) {
-    //   cprintf("wrteojhg;woerbh");
-    //   return 0;
-    // }
   }
   memset(pgdir, 0, PGSIZE);
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
@@ -149,7 +145,6 @@ setupkvm(void)
   for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
     if(mappages(pgdir, k->virt, k->phys_end - k->phys_start,
                 (uint)k->phys_start, k->perm) < 0) {
-      // cprintf("BAD MOFO\n");
       freevm(pgdir);
       return 0;
     }
@@ -258,11 +253,9 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       swap_page(pgdir);
       mem = kalloc();
       deallocuvm(pgdir, newsz, oldsz);
-      //return 0;
     }
     memset(mem, 0, PGSIZE);
     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
-      //cprintf("allocuvm out of memory (2)\n");
       deallocuvm(pgdir, newsz, oldsz);
       kfree(mem);
       return 0;
@@ -327,18 +320,13 @@ freevm(pde_t *pgdir)
 pte_t*
 select_a_victim(pde_t *pgdir)
 {
-  // cprintf("%s\n","select_a_victim");
   int va;
   for(va = KERNBASE - 1; va >= 0; va-=4096){
     pte_t *pt_entry;
     pt_entry = walkpgdir(pgdir, (void*)va, 0);
     if(pt_entry != 0){
-    	// cprintf("%s\n","after pt_entry != 0");
       if(*pt_entry & PTE_P){
-      	// cprintf("%s\n","yay");
         if((*pt_entry & PTE_A) == 0){
-          // *pt_entry = *pt_entry & ~PTE_P;
-          // cprintf("%s\n","exit select_a_victim");
           return pt_entry;
         }
       }
@@ -346,11 +334,9 @@ select_a_victim(pde_t *pgdir)
   }
 
   clearaccessbit(pgdir);
-  //cprintf("%s\n","exit select_a_victim");
   return select_a_victim(pgdir);
 }
 
-// Clear access bit of a random pte.
 void
 clearaccessbit(pde_t *pgdir)
 {
@@ -409,12 +395,8 @@ copyuvm(pde_t *pgdir, uint sz)
 
   for(i = 0; i < sz; i += PGSIZE){
     if((mem = kalloc()) == 0) { 
-      // goto bad;
       swap_page(pgdir);
       mem = kalloc();
-      // if (mem == 0) {
-      //   cprintf("hahahahahahahaha\n");
-      // }
     }
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
