@@ -18,6 +18,7 @@
 #include "paging.h"
 
 extern int numallocblocks;
+struct spinlock sys_lock;
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -461,9 +462,12 @@ int
 sys_swap(void)
 {
   uint addr;
-  if(argint(0, (int*)&addr) < 0)
+  acquire(&sys_lock);
+  if(argint(0, (int*)&addr) < 0) {
+    release(&sys_lock);
     return -1;
+  }
   // swap addr
-
+  release(&sys_lock);
   return 0;
 }

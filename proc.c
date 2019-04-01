@@ -13,6 +13,7 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 extern struct spinlock alloc_lock;
+extern struct spinlock sys_lock;
 
 static struct proc *initproc;
 
@@ -27,6 +28,7 @@ pinit(void)
 {
   initlock(&alloc_lock, "alloc_lock");
   initlock(&ptable.lock, "ptable");
+  initlock(&sys_lock, "sys_lock");
 }
 
 // Must be called with interrupts disabled

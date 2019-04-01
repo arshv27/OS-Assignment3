@@ -14,22 +14,22 @@ Answer: "num swapped blocks: 0".
 
 Question 4: When do you update numallocblocks?
 Answer: numallocblocks is updated everytime we allocate a block or free a block. We increment the count when block is allocated, and decrement is when block is freed.
-We update this variable in balloc(), balloc_page() and bfree().
+We update this variable in balloc_page(), bfree_page().
 
 Question 5: What is the structure of your page table entry that stores the demand paging/swapping information?
-Answer:
+Answer: The top 20 bits of page table entry give address of page in memory in case it is present, or else it stores the block number on the disk. Lower 12 bits store the flags. The 10th bit stores a user defined flag PTE_SWP. PTE_SWP=1 if page is not present in memory, but on the disk. It is 0 otherwise. 
 
 Question 6: Does your scheme has a limitation on maximum swap size? If yes, what is it?
-Answer:
+Answer: At a time, only 4096 bytes can be copied from a page in memory to disk (and vice versa).
 
 Question 7: How do you ensure synchronization in balloc page and balloc free?
-Answer:
+Answer: We have created a spin lock called alloc_lock. Whenevever the routines balloc_page() or balloc_free() are called, we acquire alloc_lock, and release it before returning from function. This ensures that only one thread can execute these functions at a time.
 
 Question 8: Write the pseudocode code of your select a victim implementation.
 Answer:
 
 Question 9: Can concurrent calls to sys swap swap the same physical page? If yes, how do you ensure synchronization among them?
-Answer:
+Answer: We have created a spin lock called sys_lock. Whenevever the routine sys_swap() is called, we sys_lock, and release it before returning from function. This ensures that only one thread can execute this function at a time.
 
 Question 10: If you are not able to run memtest1 without any error, write the summary of your implementation. If you can run memtest1, then you don’t have to answer this question.
 Answer: N/A.
