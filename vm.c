@@ -291,6 +291,13 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       kfree(v);
       *pte = 0;
     }
+    else if ((*pte & PTE_SWP) != 0) {
+      pa = *pte >> 12;
+      begin_op();
+      bfree_page(1,pa);
+      end_op();
+      *pte = 0;
+    }
   }
   return newsz;
 }
@@ -413,7 +420,7 @@ copyuvm(pde_t *pgdir, uint sz)
       pa = *pte>>12;
       flags = PTE_FLAGS(*pte);
       read_page_from_disk(1, mem, pa);
-      bfree_page(1,pa);
+      //bfree_page(1,pa);
       end_op();
       if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
         goto bad;

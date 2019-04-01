@@ -71,6 +71,7 @@ balloc(uint dev)
         brelse(bp);
         bzero(dev, b + bi);
         numallocblocks++;
+        cprintf("numallocblocks: %d\n", numallocblocks);
         return b + bi;
       }
     }
@@ -102,6 +103,7 @@ balloc_page(uint dev)
         	bzero(dev, b + bi + j);
     	}
         numallocblocks += 8;
+        cprintf("numallocblocks: %d\n", numallocblocks);
         return b + bi;
       }
     }
@@ -130,7 +132,8 @@ bfree(int dev, uint b)
 
   bp->data[bi/8] &= ~m;
   log_write(bp);
-  // numallocblocks--;
+  numallocblocks--;
+  cprintf("numallocblocks: %d\n", numallocblocks);
   brelse(bp);
 }
 
@@ -143,6 +146,7 @@ bfree_page(int dev, uint b)
   for(x = 0; x < 8; x++){
   	bfree(1, b + x);
     // numallocblocks--;
+    // cprintf("numallocblocks: %d\n", numallocblocks);
   }
 }
 
