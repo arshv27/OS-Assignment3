@@ -464,7 +464,6 @@ sys_swap(void)
   if(argint(0, (int*)&addr) < 0)
     return -1;
   // swap addr
-  cprintf("fucker\n");
 
   return 0;
 }

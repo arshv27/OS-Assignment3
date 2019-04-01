@@ -12,6 +12,7 @@ struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+extern struct spinlock alloc_lock;
 
 static struct proc *initproc;
 
@@ -24,6 +25,7 @@ static void wakeup1(void *chan);
 void
 pinit(void)
 {
+  initlock(&alloc_lock, "alloc_lock");
   initlock(&ptable.lock, "ptable");
 }
 

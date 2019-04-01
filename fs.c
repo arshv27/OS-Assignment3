@@ -28,6 +28,7 @@ static void itrunc(struct inode*);
 struct superblock sb;
 int numallocblocks = 0;
 struct spinlock alloc_lock;
+// struct spinlock alloc_lock;
 
 // Read the super block.
 void
@@ -89,8 +90,9 @@ balloc_page(uint dev)
 {
   int b, bi, m, j;
   struct buf *bp;
-
+  // acquire(&alloc_lock);
   bp = 0;
+
   for(b = 0; b < sb.size; b += BPB){
     bp = bread(dev, BBLOCK(b, sb));
     for(bi = 0; bi < BPB && b + bi + 8 < sb.size; bi+=8){
@@ -102,7 +104,9 @@ balloc_page(uint dev)
         for(j = 0; j < 8; j++){
         	bzero(dev, b + bi + j);
     	  }
+        acquire(&alloc_lock);
         numallocblocks += 1;
+        release(&alloc_lock);
         return b + bi;
       }
     }
@@ -141,10 +145,13 @@ void
 bfree_page(int dev, uint b)
 {
   int x;
+  // acquire(&alloc_lock);
   for(x = 0; x < 8; x++){
   	bfree(1, b + x);
   }
+  acquire(&alloc_lock);
   numallocblocks--;
+  release(&alloc_lock);
 }
 
 
