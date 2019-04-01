@@ -27,6 +27,7 @@ static void itrunc(struct inode*);
 // only one device
 struct superblock sb;
 int numallocblocks = 0;
+struct spinlock alloc_lock;
 
 // Read the super block.
 void
@@ -70,7 +71,7 @@ balloc(uint dev)
         log_write(bp);
         brelse(bp);
         bzero(dev, b + bi);
-        numallocblocks++;
+        // numallocblocks++;
         return b + bi;
       }
     }
@@ -100,8 +101,8 @@ balloc_page(uint dev)
         brelse(bp);
         for(j = 0; j < 8; j++){
         	bzero(dev, b + bi + j);
-    	}
-        numallocblocks += 8;
+    	  }
+        numallocblocks += 1;
         return b + bi;
       }
     }
@@ -130,7 +131,7 @@ bfree(int dev, uint b)
 
   bp->data[bi/8] &= ~m;
   log_write(bp);
-  numallocblocks--;
+  // numallocblocks--;
   brelse(bp);
 }
 
@@ -143,6 +144,7 @@ bfree_page(int dev, uint b)
   for(x = 0; x < 8; x++){
   	bfree(1, b + x);
   }
+  numallocblocks--;
 }
 
 

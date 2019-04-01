@@ -12,6 +12,7 @@ char buf[8192];
 char name[3];
 char *echoargv[] = { "echo", "ALL", "TESTS", "PASSED", 0 };
 int stdout = 1;
+int numallocblocks;
 #define TOTAL_MEMORY (2 << 20) + (1 << 18) + (1 << 17)
 
 void
@@ -35,6 +36,7 @@ mem(void)
 			goto failed;
 		*(char**)m1 = m2;
 		((int*)m1)[2] = count++;
+		printf(1, "i: %d, numalloc: %d\n", count, bstat());
 		m1 = m2;
 		cur += 4096;
 	}
