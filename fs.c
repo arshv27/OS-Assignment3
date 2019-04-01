@@ -157,7 +157,7 @@ bfree(int dev, uint b)
 
   bp->data[bi/8] &= ~m;
   log_write(bp);
-  numallocblocks--;
+  // numallocblocks--;
   brelse(bp);
 }
 
@@ -169,7 +169,7 @@ bfree_page(int dev, uint b)
   int x;
   for(x = 0; x < 8; x++){
   	bfree(1, b + x);
-    numallocblocks--;
+    // numallocblocks--;
   }
 }
 

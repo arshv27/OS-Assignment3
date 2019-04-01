@@ -23,7 +23,7 @@ mem(void)
 	uint total_count;
 	int pid;
 
-	printf(1, "mem test\n");
+	// printf(1, "mem test\n");
 
 	m1 = malloc(4096);
 	if (m1 == 0)
@@ -57,10 +57,10 @@ mem(void)
 	// printf(1,"out of 2nd while loop");
 	if (swap(start) != 0)
 		printf(1, "failed to swap %p\n", start);
-	printf(1,"Forking\n");
+	// printf(1,"Forking\n");
 	pid = fork();
-	printf(1,"PID: %d\n", pid);
-	printf(1,"Done Forking\n");
+	// printf(1,"PID: %d\n", pid);
+	// printf(1,"Done sForking\n");
 	if (pid == 0){
 		count = 0;
 		m1 = start;
@@ -72,7 +72,7 @@ mem(void)
 			m1 = *(char**)m1;
 			count++;
 		}
-		printf(1,"Out of while loop\n");
+		// printf(1,"Out of while loop\n");
 		exit();
 	}
 	else if (pid < 0)
@@ -81,7 +81,7 @@ mem(void)
 	}
 	else if (pid > 0)
 	{
-		printf(1, "Parents PID = %d\n", pid);
+		// printf(1, "Parents PID = %d\n", pid);
 		wait();
 	}
 

@@ -183,15 +183,15 @@ fork(void)
   }
 
   // Copy process state from proc.
-  cprintf("Entering copyuvm\n");
+  // cprintf("Entering copyuvm\n");
   if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
     kfree(np->kstack);
     np->kstack = 0;
     np->state = UNUSED;
-    cprintf("BAD MOFO\n");
+    // cprintf("BAD MOFO\n");
     return -1;
   }
-  cprintf("Exiting copyuvm\n");
+  // cprintf("Exiting copyuvm\n");
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
