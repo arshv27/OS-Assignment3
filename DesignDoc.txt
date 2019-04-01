@@ -1,0 +1,35 @@
+Operating Systems
+Assignment 3
+
+Group Members : Bhavya Srivastava (2017037), Raghav Gupta (2017178), Arsh Verma (2017221)
+
+Question 1: Are you able to run memtest1 without any error?
+Answer: Yes.
+
+Question 2: Are you able to run memtest2 without any error?
+Answer: Yes.
+
+Question 3: Run memtest3 after memtest1 and memtest2. What is the output of memtest3?
+Answer: "num swapped blocks: 0".
+
+Question 4: When do you update numallocblocks?
+Answer: numallocblocks is updated everytime we allocate a block or free a block. We increment the count when block is allocated, and decrement is when block is freed.
+We update this variable in balloc(), balloc_page() and bfree().
+
+Question 5: What is the structure of your page table entry that stores the demand paging/swapping information?
+Answer:
+
+Question 6: Does your scheme has a limitation on maximum swap size? If yes, what is it?
+Answer:
+
+Question 7: How do you ensure synchronization in balloc page and balloc free?
+Answer:
+
+Question 8: Write the pseudocode code of your select a victim implementation.
+Answer:
+
+Question 9: Can concurrent calls to sys swap swap the same physical page? If yes, how do you ensure synchronization among them?
+Answer:
+
+Question 10: If you are not able to run memtest1 without any error, write the summary of your implementation. If you can run memtest1, then you don’t have to answer this question.
+Answer: N/A.
