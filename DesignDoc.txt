@@ -26,7 +26,37 @@ Question 7: How do you ensure synchronization in balloc page and balloc free?
 Answer: We have created a spin lock called alloc_lock. Whenevever the routines balloc_page() or balloc_free() are called, we acquire alloc_lock, and release it before returning from function. This ensures that only one thread can execute these functions at a time.
 
 Question 8: Write the pseudocode code of your select a victim implementation.
-Answer:
+Answer: Pseudocode --
+
+function select_a_victim(pgdir){
+
+	for va = KERNBASE to 0 (iterate backwards) {
+		// calculate page table entry for virtual address va
+		pte = walkpgdir(pgdir, va, 0)
+		if(page table entry was found){
+			if(PTE_P present flag is set){
+				if(access bit of pte is not set){
+					return pte
+				}
+			}
+		}
+	}
+
+
+	// if no page table entry found with access bit not set, then we find the first pte with present bit set, and reset its access bit.
+	for va = KERNBASE to 0 (iterate backwards) {
+		// calculate page table entry for virtual address va
+		pte = walkpgdir(pgdir, va, 0)
+		if(page table entry was found){
+			if(PTE_P present flag is set){
+				reset PTE_A flag of the page table entry pte
+				select_a_victim()
+			}
+		}
+	}
+}
+
+
 
 Question 9: Can concurrent calls to sys swap swap the same physical page? If yes, how do you ensure synchronization among them?
 Answer: We have created a spin lock called sys_lock. Whenevever the routine sys_swap() is called, we sys_lock, and release it before returning from function. This ensures that only one thread can execute this function at a time.
